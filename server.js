@@ -1,7 +1,8 @@
-const express = resquire('express');
+const express = require('express');
 const app = express();
 const bodyparser = require('body-parser');
 const env = require('dotenv').config();
+const controller = require('./controllers/selectedfordev');
 
 let port = process.env.PORT || 3030;
 
@@ -12,4 +13,4 @@ app.listen(port, () => {
     console.log('Conversion bot listening on port ' + port);
 });
 
-app.use('/selectedfordev', './controllers/selectedfordev.js')
+app.use('/selectedfordev', controller.sfd);
