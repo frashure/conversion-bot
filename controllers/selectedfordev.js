@@ -153,7 +153,7 @@ const controller = {
     payload.attachments[0].content.body[2].text = req.body.issue.fields.summary;
 
     // set link
-    payload.attachments[0].content.body[3].actions.url = 'https://alm.cgifederal.com/projects/browse/' + req.body.issue.key;
+    payload.attachments[0].content.body[3].actions[0].url = 'https://alm.cgifederal.com/projects/browse/' + req.body.issue.key;
 
     let postOptions = {
         method: 'POST',
