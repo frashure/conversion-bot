@@ -171,6 +171,10 @@ const controller = {
             console.log(postOptions.body);
             res.status(response.statusCode).send();
         }
+        else if (response.statusCode == 429) {
+            console.log('Too many requests.')
+            res.status(429).send();
+        }
         else {
             console.log(body);
             console.log(response.statusCode);
