@@ -86,7 +86,7 @@ var payload = {
                         "items": [
                             {
                                 "type": "TextBlock",
-                                "text": "Aug 6, 2019",
+                                "text": "Issue key goes here",
                                 "color": "Light"
                             },
                             {
@@ -138,13 +138,9 @@ const controller = {
 
 
     sfd: (req, res, next) => {
-    
-    let d = new Date();
-    let month = d.getMonth() + 1;
-    let day = d.getDate();
-    let year = d.getFullYear();
 
-    // set date
+
+    // set issue key
     payload.attachments[0].content.body[1].columns[1].items[0].text = req.body.issue.key;
 
     // set value stream
