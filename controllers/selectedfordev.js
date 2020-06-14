@@ -1,91 +1,7 @@
 const fetch = require('node-fetch');
 const request = require('request');
 
-let testData = {
-    "id":2,
-    "timestamp":1525698237764,
-    "issue":{
-       "id":"99291",
-       "self":"https://jira.atlassian.com/rest/api/2/issue/99291",
-       "key":"JRA-20002",
-       "fields":{
-          "summary":"I feel the need for speed",
-          "created":"2009-12-16T23:46:10.612-0600",
-          "description":"Make the issue nav load 10x faster",
-          "labels":[
-             "UI",
-             "dialogue",
-             "move"
-          ],
-          "priority":"Minor"
-       }
-    },
-    "user":{
-       "self":"https://jira.atlassian.com/rest/api/2/user?username=brollins",
-       "name":"brollins",
-       "key":"brollins",
-       "emailAddress":"bryansemail at atlassian dot com",
-       "avatarUrls":{
-          "16x16":"https://jira.atlassian.com/secure/useravatar?size=small&avatarId=10605",
-          "48x48":"https://jira.atlassian.com/secure/useravatar?avatarId=10605"
-       },
-       "displayName":"Bryan Rollins [Atlassian]",
-       "active":"true"
-    },
-    "changelog":{
-       "items":[
-          {
-             "toString":"A new summary.",
-             "to":null,
-             "fromString":"What is going on here?????",
-             "from":null,
-             "fieldtype":"jira",
-             "field":"summary"
-          },
-          {
-             "toString":"New Feature",
-             "to":"2",
-             "fromString":"Improvement",
-             "from":"4",
-             "fieldtype":"jira",
-             "field":"issuetype"
-          }
-       ],
-       "id":10124
-    },
-    "comment":{
-       "self":"https://jira.atlassian.com/rest/api/2/issue/10148/comment/252789",
-       "id":"252789",
-       "author":{
-          "self":"https://jira.atlassian.com/rest/api/2/user?username=brollins",
-          "name":"brollins",
-          "emailAddress":"bryansemail@atlassian.com",
-          "avatarUrls":{
-             "16x16":"https://jira.atlassian.com/secure/useravatar?size=small&avatarId=10605",
-             "48x48":"https://jira.atlassian.com/secure/useravatar?avatarId=10605"
-          },
-          "displayName":"Bryan Rollins [Atlassian]",
-          "active":true
-       },
-       "body":"Just in time for AtlasCamp!",
-       "updateAuthor":{
-          "self":"https://jira.atlassian.com/rest/api/2/user?username=brollins",
-          "name":"brollins",
-          "emailAddress":"brollins@atlassian.com",
-          "avatarUrls":{
-             "16x16":"https://jira.atlassian.com/secure/useravatar?size=small&avatarId=10605",
-             "48x48":"https://jira.atlassian.com/secure/useravatar?avatarId=10605"
-          },
-          "displayName":"Bryan Rollins [Atlassian]",
-          "active":true
-       },
-       "created":"2011-06-07T10:31:26.805-0500",
-       "updated":"2011-06-07T10:31:26.805-0500"
-    },
-    "webhookEvent":"jira:issue_updated"
- };
-
-let payload = {
+var payload = {
     "roomId": process.env.roomId,
     "text": "notification text",
     "attachments": [
@@ -145,7 +61,7 @@ let payload = {
                         "items": [
                             {
                                 "type": "TextBlock",
-                                "text": "Date:",
+                                "text": "Issue Key:",
                                 "color": "Light"
                             },
                             {
@@ -157,7 +73,7 @@ let payload = {
                             },
                             {
                                 "type": "TextBlock",
-                                "text": "Epic:",
+                                "text": "Issue Type:",
                                 "weight": "Lighter",
                                 "color": "Light",
                                 "spacing": "Small"
@@ -182,7 +98,7 @@ let payload = {
                             },
                             {
                                 "type": "TextBlock",
-                                "text": "Test-Epic",
+                                "text": "Bug",
                                 "weight": "Lighter",
                                 "color": "Light",
                                 "spacing": "Small"
@@ -216,25 +132,43 @@ let payload = {
     ]
     };
 
-let postOptions = {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + process.env.bot_token,
-    },
-    body: JSON.stringify(payload)
-};
-
 let url = 'https://webexapis.com/v1/messages';
 
 const controller = {
 
-    // let issueNo = testData.issue.key;
-    // let summary = testData.issue.fields.summary;
 
- 
+    sfd: (req, res, next) => {
+    
+    let d = new Date();
+    let month = d.getMonth() + 1;
+    let day = d.getDate();
+    let year = d.getFullYear();
 
-    sfd: (req, res, next) => request.post(url, postOptions, (error, response, body) => {
+    // set date
+    payload.attachments[0].content.body[1].columns[1].items[0].text = req.body.issue.key;
+
+    // set value stream
+    payload.attachments[0].content.body[1].columns[1].items[1].text = req.body.issue.fields.components[0].name;
+    
+    // set issue type
+    payload.attachments[0].content.body[1].columns[1].items[2].text = req.body.issue.fields.issuetype.name;
+
+    // set summary
+    payload.attachments[0].content.body[2].text = req.body.issue.fields.summary;
+
+    // set link
+    payload.attachments[0].content.body[3].actions.url = 'https://alm.cgifederal.com/projects/browse/' + req.body.issue.key;
+
+    let postOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + process.env.bot_token,
+        },
+        body: JSON.stringify(payload)
+    };
+
+    request.post(url, postOptions, (error, response, body) => {
         if (error) {
             console.log(error);
             console.log(response.statusCode);
@@ -247,9 +181,7 @@ const controller = {
             res.status(200).send();
         }
     })
+    }
 }
 
 module.exports = controller;
-
-
-
