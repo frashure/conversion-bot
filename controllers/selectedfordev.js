@@ -171,16 +171,17 @@ const controller = {
             console.log(postOptions.body);
             res.status(response.statusCode).send();
         }
-        else if (response.statusCode == 429) {
-            console.log('Too many requests.')
-            res.status(429).send();
+        else if (response.statusCode !== 200) {
+            console.log(response.statusMessage);
+            res.status(response.statusCode);
+            res.json(response.statusMessage);
         }
         else {
-            console.log(body);
-            console.log(response.statusCode);
-            res.status(200).send();
+            res.status(response.statusCode);
+            res.json(response.statusMessage);
         }
     })
+
     }
 }
 
