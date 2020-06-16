@@ -1,8 +1,6 @@
 const fetch = require('node-fetch');
 const request = require('request');
 
-let iconUrl = 'https://jira.frashure.io/images/';
-
 var payload = {
     "roomId": process.env.roomId,
     "text": "notification text",
@@ -23,7 +21,7 @@ var payload = {
                             {
                                 "type": "Image",
                                 "style": "Person",
-                                "url": iconUrl,
+                                "url": 'http://jira.frashure.io/images/bug.png',
                                 "size": "Medium",
                                 "height": "50px"
                             }
@@ -144,20 +142,20 @@ const controller = {
 
     switch(req.body.issue.fields.issuetype.name) {
         case 'Bug':
-            iconUrl = iconUrl + 'bug.png';
+            payload.attachments[0].content.body[0].columns[0].items[0].url = 'https://jira.frashure.io/images/bug.png';
             break;
         case 'Story':
-            iconUrl = iconUrl + 'story.png'
+            payload.attachments[0].content.body[0].columns[0].items[0].url = 'https://jira.frashure.io/images/story.png'
             break;
         case 'Task':
-            iconUrl = iconUrl + 'task.png';
+            payload.attachments[0].content.body[0].columns[0].items[0].url = 'https://jira.frashure.io/images/task.png';
             break;
         case 'Project action item':
-            iconUrl = iconUrl + 'action_item.png';
+            payload.attachments[0].content.body[0].columns[0].items[0].url = 'https://jira.frashure.io/images/action_item.png';
             break;
     }
 
-    console.log(iconUrl);
+    console.log(payload.attachments[0].content.body[0].columns[0].items[0].url);
 
 
     // set issue key
