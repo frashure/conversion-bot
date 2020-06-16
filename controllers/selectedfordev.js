@@ -147,7 +147,13 @@ const controller = {
             iconUrl = iconUrl + 'bug.png';
             break;
         case 'Story':
-            iconUrl = iconUrl + 'story.svg'
+            iconUrl = iconUrl + 'story.png'
+            break;
+        case 'Task':
+            iconUrl = iconUrl + 'task.png';
+            break;
+        case 'Project action item':
+            iconUrl = iconUrl + 'action_item.png';
             break;
     }
 
