@@ -1,6 +1,8 @@
 const fetch = require('node-fetch');
 const request = require('request');
 
+let iconUrl = 'https://jira.frashure.io/images/';
+
 var payload = {
     "roomId": process.env.roomId,
     "text": "notification text",
@@ -21,7 +23,7 @@ var payload = {
                             {
                                 "type": "Image",
                                 "style": "Person",
-                                "url": "https://developer.webex.com/images/webex-teams-logo.png",
+                                "url": iconUrl,
                                 "size": "Medium",
                                 "height": "50px"
                             }
@@ -140,6 +142,18 @@ const controller = {
     sfd: (req, res, next) => {
 
 
+    switch(req.body.issue.fields.issuetype.name) {
+        case 'Bug':
+            iconUrl = iconUrl + 'bug.png';
+            break;
+        case 'Story':
+            iconUrl = iconUrl + 'story.svg'
+            break;
+    }
+
+    console.log(iconUrl);
+
+
     // set issue key
     payload.attachments[0].content.body[1].columns[1].items[0].text = req.body.issue.key;
 
@@ -166,12 +180,13 @@ const controller = {
 
     request.post(url, postOptions, (error, response, body) => {
         if (error) {
-            console.log(error);
+            console.log('Error: ' + error);
             console.log(response.statusCode);
             console.log(postOptions.body);
             res.status(response.statusCode).send();
         }
         else if (response.statusCode !== 200) {
+            console.log()
             console.log(response.statusMessage);
             res.status(response.statusCode);
             res.json(response.statusMessage);

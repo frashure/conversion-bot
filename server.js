@@ -3,6 +3,7 @@ const app = express();
 const bodyparser = require('body-parser');
 const env = require('dotenv').config();
 const controller = require('./controllers/selectedfordev');
+const path = require('path');
 
 let port = process.env.PORT || 3030;
 
@@ -14,3 +15,4 @@ app.listen(port, () => {
 });
 
 app.use('/selectedfordev', controller.sfd);
+app.use('/images', express.static(path.join(__dirname, 'images')));
