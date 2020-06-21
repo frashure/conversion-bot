@@ -155,9 +155,6 @@ const controller = {
             break;
     }
 
-    console.log(payload.attachments[0].content.body[0].columns[0].items[0].url);
-
-
     // set issue key
     payload.attachments[0].content.body[1].columns[1].items[0].text = req.body.issue.key;
 
