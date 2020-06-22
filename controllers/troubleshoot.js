@@ -7,7 +7,7 @@ const controller = {
         console.log(req.body);
 
 
-        var events = req.body.events;
+        var events = req.body.issue.events;
 
         for (i = 0; i < events.length; i++) {
 
