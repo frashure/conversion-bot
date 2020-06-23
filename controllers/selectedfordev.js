@@ -91,7 +91,7 @@ var payload = {
                             },
                             {
                                 "type": "TextBlock",
-                                "text": "",
+                                "text": "None",
                                 "color": "Light",
                                 "weight": "Lighter",
                                 "spacing": "Small"
@@ -165,7 +165,9 @@ const controller = {
     if (req.body.issue.fields.components.length > 0) {
         payload.attachments[0].content.body[1].columns[1].items[1].text = req.body.issue.fields.components[0].name;
     }
-    
+    else {
+        payload.attachments[0].content.body[1].columns[1].items[1].text = "None";
+    }
     // set issue type
     payload.attachments[0].content.body[1].columns[1].items[2].text = req.body.issue.fields.issuetype.name;
 
