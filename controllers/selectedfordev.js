@@ -139,6 +139,9 @@ const controller = {
 
     sfd: (req, res, next) => {
 
+        var issue = req.body.issue.fields;
+        console.log(issue);
+
 
     switch(req.body.issue.fields.issuetype.name) {
         case 'Bug':
