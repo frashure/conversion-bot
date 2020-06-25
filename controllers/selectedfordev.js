@@ -233,11 +233,14 @@ const controller = {
         "name": assignee
     };
 
+    let credsBuffer = new Buffer(process.env.jiraCreds);
+    let credsString = credsBuffer.toString('base64');
+
     let putAssigneeOptions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + process.env.bot_token,
+                'Authorization': 'Basic ' + credsString
             },
             body: JSON.stringify(putAssigneePayload)
         };
