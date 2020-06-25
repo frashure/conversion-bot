@@ -15,6 +15,6 @@ app.listen(port, () => {
     console.log('Conversion bot listening on port ' + port);
 });
 
-app.use('/selectedfordev', sfd.sfd);
+app.use('/selectedfordev', sfd.sfd, sfd.assign);
 app.use('/troubleshoot', ts.troubleshoot);
 app.use('/images', express.static(path.join(__dirname, 'images')));

@@ -204,50 +204,77 @@ const controller = {
             res.json(response.statusMessage);
         }
         else {
-            res.status(response.statusCode);
-            res.json(response.statusMessage);
+            return next();
         }
     })
 
-    let assignee;
-    if (req.body.issue.fields.components.length > 0 && !(team.includes(req.body.issue.fields.assignee))) {
-        switch(req.body.issue.fields.components[0].name) {
-            case 'R2R': assignee = team[0];
-            break;
-            case 'RA': assignee = team[1];
-            break;
-            case 'BF2E': assignee = team[2];
-            break;
-            case 'P2P':
-            case 'A2D': assignee = team[3];
-            break;
-            case 'R2P': assignee = team[4];
-            break;
-            case 'GS':
-            case 'B2C': assignee = team[5];
-            break;
+
+
+    }, // end sfd function
+
+    assign: (req, res, next) => {
+
+        let assignee;
+        if (req.body.issue.fields.components.length > 0 && !(team.includes(req.body.issue.fields.assignee))) {
+            switch(req.body.issue.fields.components[0].name) {
+                case 'R2R': assignee = team[0];
+                break;
+                case 'RA': assignee = team[1];
+                break;
+                case 'BF2E': assignee = team[2];
+                break;
+                case 'P2P':
+                case 'A2D': assignee = team[3];
+                break;
+                case 'R2P': assignee = team[4];
+                break;
+                case 'GS':
+                case 'B2C': assignee = team[5];
+                break;
+            }
         }
-    }
-
-    let putAssigneePayload = {
-        "name": assignee
-    };
-
-    let credsBuffer = new Buffer(process.env.jiraCreds);
-    let credsString = credsBuffer.toString('base64');
-
-    let putAssigneeOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + credsString
-            },
-            body: JSON.stringify(putAssigneePayload)
+    
+        let putAssigneePayload = {
+            "name": assignee
         };
+    
+        let credsBuffer = new Buffer(process.env.jiraCreds);
+        let credsString = credsBuffer.toString('base64');
+    
+        let putAssigneeOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + credsString
+                },
+                body: JSON.stringify(putAssigneePayload)
+            };
+    
+        let assigneeURL = 'https://alm.cgifederal.com/projects/rest/api/latest/issue/' + req.body.issue.key + '/assignee';
+        request.put(assigneeURL, putAssigneeOptions, (error, response, body => {
+            if (error) {
+                console.log('Error: ' + error);
+                console.log(response.statusCode);
+                console.log(postOptions.body);
+                res.status(response.statusCode).send();
+            }
+            else if (response.statusCode !== 200) {
+                console.log()
+                console.log(response.statusMessage);
+                res.status(response.statusCode);
+                res.json(response.statusMessage);
+            }
+            else {
+                res.status(response.statusCode);
+                res.json(response.statusMessage);
+            }
+        }))
+    
 
+    } //end assign
 
-
-    } // end sfd function
 }
+
+
 
 module.exports = controller;
