@@ -134,6 +134,8 @@ var payload = {
 
 let url = 'https://webexapis.com/v1/messages';
 
+let team = ["cfrashur", "vfelder", "mramelb", "dmeissne", "rgwilson", "tksmith"]
+
 const controller = {
 
 
@@ -141,6 +143,8 @@ const controller = {
 
         // var issue = req.body.issue.fields;
         // console.log(issue);
+
+        // customfield_19100 << assigned project team
 
 
     switch(req.body.issue.fields.issuetype.name) {
@@ -205,7 +209,42 @@ const controller = {
         }
     })
 
+    let assignee;
+    if (req.body.issue.fields.components.length > 0 && !(team.includes(req.body.issue.fields.assignee))) {
+        switch(req.body.issue.fields.components[0].name) {
+            case 'R2R': assignee = team[0];
+            break;
+            case 'RA': assignee = team[1];
+            break;
+            case 'BF2E': assignee = team[2];
+            break;
+            case 'P2P':
+            case 'A2D': assignee = team[3];
+            break;
+            case 'R2P': assignee = team[4];
+            break;
+            case 'GS':
+            case 'B2C': assignee = team[5];
+            break;
+        }
     }
+
+    let putAssigneePayload = {
+        "name": assignee
+    };
+
+    let putAssigneeOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + process.env.bot_token,
+            },
+            body: JSON.stringify(putAssigneePayload)
+        };
+
+
+
+    } // end sfd function
 }
 
 module.exports = controller;
