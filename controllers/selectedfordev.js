@@ -238,7 +238,8 @@ const controller = {
             "name": assignee
         };
     
-        let credsBuffer = new Buffer(process.env.jiraCreds);
+        let rawCreds = process.env.jiraCreds;
+        let credsBuffer = new Buffer(rawCreds);
         let credsString = credsBuffer.toString('base64');
     
         let putAssigneeOptions = {
