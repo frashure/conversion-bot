@@ -216,6 +216,7 @@ const controller = {
 
         let assignee;
         if (req.body.issue.fields.components.length > 0 && !(team.includes(req.body.issue.fields.assignee))) {
+
             switch(req.body.issue.fields.components[0].name) {
                 case 'R2R': assignee = team[0];
                 break;
@@ -232,27 +233,77 @@ const controller = {
                 case 'B2C': assignee = team[5];
                 break;
             }
+
+            let putAssigneePayload = {
+                "name": assignee
+            };
+        
+            let rawCreds = process.env.jiraCreds;
+            let credsBuffer = new Buffer(rawCreds);
+            let credsString = credsBuffer.toString('base64');
+        
+            let putAssigneeOptions = {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + credsString
+                    },
+                    body: JSON.stringify(putAssigneePayload)
+                };
+        
+            let assigneeURL = 'https://alm.cgifederal.com/projects/rest/api/latest/issue/' + req.body.issue.key + '/assignee';
+    
+            request.put(assigneeURL, putAssigneeOptions, (error, response, body) => {
+                if (error) {
+                    console.log('Error: ' + error);
+                    console.log(response.statusCode);
+                    console.log(postOptions.body);
+                    res.status(response.statusCode).send();
+                }
+                else if (response.statusCode !== 200) {
+                    console.log()
+                    console.log(response.statusMessage);
+                    // res.status(response.statusCode);
+                    // res.json(response.statusMessage);
+                    return next();
+                }
+                else {
+                    return next();
+                }
+            });
+
+        } 
+        else {
+            return next();
         }
-    
-        let putAssigneePayload = {
-            "name": assignee
-        };
-    
+    }, //end assign
+
+    updateTeam: (req, res, next) => {
+        
         let rawCreds = process.env.jiraCreds;
         let credsBuffer = new Buffer(rawCreds);
         let credsString = credsBuffer.toString('base64');
-    
-        let putAssigneeOptions = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + credsString
-                },
-                body: JSON.stringify(putAssigneePayload)
-            };
-    
-        let assigneeURL = 'https://alm.cgifederal.com/projects/rest/api/latest/issue/' + req.body.issue.key + '/assignee';
-        request.put(assigneeURL, putAssigneeOptions, (error, response, body => {
+
+        let updateTeamURL = 'https://alm.cgifederal.com/projects/rest/api/latest/issue/' + req.body.issue.key;
+
+        let updateTeamPayload = {
+            "fields": {
+                "customfield_19100": {
+                    "value": "Conversion D&D"
+                }
+            }
+        };
+
+        let updateTeamOptions = {
+            method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + credsString
+                    },
+                    body: JSON.stringify(updateTeamPayload)
+        };
+
+        request.put(updateTeamURL, updateTeamOptions, (error, response, body) => {
             if (error) {
                 console.log('Error: ' + error);
                 console.log(response.statusCode);
@@ -269,10 +320,8 @@ const controller = {
                 res.status(response.statusCode);
                 res.json(response.statusMessage);
             }
-        }))
-    
-
-    } //end assign
+        })
+    }
 
 }
 
