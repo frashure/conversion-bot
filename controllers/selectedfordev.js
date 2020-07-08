@@ -3,7 +3,7 @@ const request = require('request');
 // path module for building relative filepath
 const path = require('path');
 // import Webex card object
-const payload = require('webexCard');
+const payload = require('../resources/webexCard');
 
 // url to Webex messages API; we send the Webex card (payload object) here
 let url = 'https://webexapis.com/v1/messages';
