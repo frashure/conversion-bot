@@ -1,220 +1,90 @@
-const fetch = require('node-fetch');
+// request module for making the HTTP request
 const request = require('request');
+// path module for building relative filepath
+const path = require('path');
+// import Webex card object
+const payload = require('webexCard');
 
-var payload = {
-    "roomId": process.env.roomId,
-    "text": "notification text",
-    "attachments": [
-        {
-        "contentType": "application/vnd.microsoft.card.adaptive",
-        "content": {
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "type": "AdaptiveCard",
-            "version": "1.0",
-            "body": [
-            {
-                "type": "ColumnSet",
-                "columns": [
-                    {
-                        "type": "Column",
-                        "items": [
-                            {
-                                "type": "Image",
-                                "style": "Person",
-                                "url": 'http://jira.frashure.io/images/bug.png',
-                                "size": "Medium",
-                                "height": "50px"
-                            }
-                        ],
-                        "width": "auto"
-                    },
-                    {
-                        "type": "Column",
-                        "items": [
-                            {
-                                "type": "TextBlock",
-                                "text": "Data Conversion Notification System",
-                                "weight": "Lighter",
-                                "color": "Accent"
-                            },
-                            {
-                                "type": "TextBlock",
-                                "weight": "Bolder",
-                                "text": "Issue Selected for Development",
-                                "horizontalAlignment": "Left",
-                                "wrap": true,
-                                "color": "Light",
-                                "size": "Large",
-                                "spacing": "Small"
-                            }
-                        ],
-                        "width": "stretch"
-                    }
-                ]
-            },
-            {
-                "type": "ColumnSet",
-                "columns": [
-                    {
-                        "type": "Column",
-                        "width": 35,
-                        "items": [
-                            {
-                                "type": "TextBlock",
-                                "text": "Issue Key:",
-                                "color": "Light"
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "Value Stream:",
-                                "weight": "Lighter",
-                                "color": "Light",
-                                "spacing": "Small"
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "Issue Type:",
-                                "weight": "Lighter",
-                                "color": "Light",
-                                "spacing": "Small"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "Column",
-                        "width": 65,
-                        "items": [
-                            {
-                                "type": "TextBlock",
-                                "text": "Issue key goes here",
-                                "color": "Light"
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "None",
-                                "color": "Light",
-                                "weight": "Lighter",
-                                "spacing": "Small"
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "Bug",
-                                "weight": "Lighter",
-                                "color": "Light",
-                                "spacing": "Small"
-                            }
-                        ]
-                    }
-                ],
-                "spacing": "Padding",
-                "horizontalAlignment": "Center"
-            },
-            {
-                "type": "TextBlock",
-                "text": "Issue summary goes here.",
-                "wrap": true
-            },
-            {
-                "type": "ActionSet",
-                "horizontalAlignment": "Left",
-                "spacing": "None",
-                "actions": [
-                    {
-                        "type": "Action.OpenUrl",
-                        "title": "View in JIRA",
-                        "url": "http://google.com"
-                    }
-                ]
-            }
-        ]
-        }
-        }
-    ]
-    };
-
+// url to Webex messages API; we send the Webex card (payload object) here
 let url = 'https://webexapis.com/v1/messages';
 
+// conversion dev team Atlassian usernames
 let team = ["cfrashur", "vfelder", "mramelb", "dmeissne", "rgwilson", "tksmith"]
 
 const controller = {
 
-
+    // this function runs first - builds and sends Webex notification
+    // then it passes the incoming req object to next()
     sfd: (req, res, next) => {
 
-        // var issue = req.body.issue.fields;
-        // console.log(issue);
-
+        // TODO: ensure assigned project team field is set to 'Conversion D&D'
         // customfield_19100 << assigned project team
+        // << reporting project team
 
-
-    switch(req.body.issue.fields.issuetype.name) {
-        case 'Bug':
-            payload.attachments[0].content.body[0].columns[0].items[0].url = 'https://jira.frashure.io/images/bug.png';
-            break;
-        case 'Story':
-            payload.attachments[0].content.body[0].columns[0].items[0].url = 'https://jira.frashure.io/images/story.png'
-            break;
-        case 'Task':
-            payload.attachments[0].content.body[0].columns[0].items[0].url = 'https://jira.frashure.io/images/task.png';
-            break;
-        case 'Project action item':
-            payload.attachments[0].content.body[0].columns[0].items[0].url = 'https://jira.frashure.io/images/action_item.png';
-            break;
-    }
-
-    // set issue key
-    payload.attachments[0].content.body[1].columns[1].items[0].text = req.body.issue.key;
-
-    // set value stream, if one exists
-    if (req.body.issue.fields.components.length > 0) {
-        payload.attachments[0].content.body[1].columns[1].items[1].text = req.body.issue.fields.components[0].name;
-    }
-    else {
-        payload.attachments[0].content.body[1].columns[1].items[1].text = "None";
-    }
-    // set issue type
-    payload.attachments[0].content.body[1].columns[1].items[2].text = req.body.issue.fields.issuetype.name;
-
-    // set summary
-    payload.attachments[0].content.body[2].text = req.body.issue.fields.summary;
-
-    // set link
-    payload.attachments[0].content.body[3].actions[0].url = 'https://alm.cgifederal.com/projects/browse/' + req.body.issue.key;
-
-    let postOptions = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + process.env.bot_token,
-        },
-        body: JSON.stringify(payload)
-    };
-
-    request.post(url, postOptions, (error, response, body) => {
-        if (error) {
-            console.log('Error: ' + error);
-            console.log(response.statusCode);
-            console.log(postOptions.body);
-            res.status(response.statusCode).send();
+        // set proper icon URL based on incoming issue type
+        switch(req.body.issue.fields.issuetype.name) {
+            case 'Bug':
+                payload.attachments[0].content.body[0].columns[0].items[0].url = path.join(__dirname, '../images/bug.png');
+                break;
+            case 'Story':
+                payload.attachments[0].content.body[0].columns[0].items[0].url = path.join(__dirname, '../images/story.png');
+                break;
+            case 'Task':
+                payload.attachments[0].content.body[0].columns[0].items[0].url = path.join(__dirname, '../images/task.png');
+                break;
+            case 'Project action item':
+                payload.attachments[0].content.body[0].columns[0].items[0].url = path.join(__dirname, '../images/action_item.png');
+                break;
         }
-        else if (response.statusCode !== 200) {
-            console.log()
-            console.log(response.statusMessage);
-            res.status(response.statusCode);
-            res.json(response.statusMessage);
+
+        // set issue key
+        payload.attachments[0].content.body[1].columns[1].items[0].text = req.body.issue.key;
+
+        // set value stream, if one exists
+        if (req.body.issue.fields.components.length > 0) {
+            payload.attachments[0].content.body[1].columns[1].items[1].text = req.body.issue.fields.components[0].name;
         }
         else {
-            return next();
+            payload.attachments[0].content.body[1].columns[1].items[1].text = "None";
         }
-    })
+        // set issue type
+        payload.attachments[0].content.body[1].columns[1].items[2].text = req.body.issue.fields.issuetype.name;
 
+        // set summary
+        payload.attachments[0].content.body[2].text = req.body.issue.fields.summary;
 
+        // set link
+        payload.attachments[0].content.body[3].actions[0].url = 'https://alm.cgifederal.com/projects/browse/' + req.body.issue.key;
 
+        let postOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + process.env.bot_token,
+            },
+            body: JSON.stringify(payload)
+        };
+
+        request.post(url, postOptions, (error, response, body) => {
+            if (error) {
+                console.log('Error: ' + error);
+                res.status(response.statusCode).send();
+            }
+            // this should only catch 300 redirects
+            else if (!(response.statusCode >= 200 && response.statusCode < 300)) {
+                res.status(response.statusCode);
+                res.json(response.statusMessage);
+            }
+            else {
+                return next();
+            }
+        })
     }, // end sfd function
 
     assign: (req, res, next) => {
 
         let assignee;
+        // check if component field is empty or if already assigned to dev team member
         if (req.body.issue.fields.components.length > 0 && !(team.includes(req.body.issue.fields.assignee))) {
 
             switch(req.body.issue.fields.components[0].name) {
@@ -234,12 +104,13 @@ const controller = {
                 break;
             }
 
+            // this is all the assign API endpoints needs
             let putAssigneePayload = {
                 "name": assignee
             };
-        
-            let rawCreds = process.env.jiraCreds;
-            let credsBuffer = new Buffer(rawCreds);
+            
+            // encrypt Jira credentials; can't be sent in plain text, even over SSL/TLS
+            let credsBuffer = new Buffer(process.env.jiraCreds);
             let credsString = credsBuffer.toString('base64');
         
             let putAssigneeOptions = {
@@ -257,15 +128,11 @@ const controller = {
                 if (error) {
                     console.log('Error: ' + error);
                     console.log(response.statusCode);
-                    console.log(postOptions.body);
                     res.status(response.statusCode).send();
                 }
-                else if (response.statusCode !== 200) {
-                    console.log()
-                    console.log(response.statusMessage);
-                    // res.status(response.statusCode);
-                    // res.json(response.statusMessage);
-                    return next();
+                else if (!(response.statusCode >= 200 && response.statusCode < 300)) {
+                    res.status(response.statusCode);
+                    res.json(response.statusMessage);
                 }
                 else {
                     return next();
@@ -273,6 +140,8 @@ const controller = {
             });
 
         } 
+        // else here means there's no component or issue is already assigned to dev team
+        // pass request to next() and carry on
         else {
             return next();
         }
@@ -280,12 +149,13 @@ const controller = {
 
     updateTeam: (req, res, next) => {
         
-        let rawCreds = process.env.jiraCreds;
-        let credsBuffer = new Buffer(rawCreds);
+        // encryp Jira credentials; cannot send plaintext, even over SSL/TLS
+        let credsBuffer = new Buffer(process.env.jiraCreds);
         let credsString = credsBuffer.toString('base64');
 
         let updateTeamURL = 'https://alm.cgifederal.com/projects/rest/api/latest/issue/' + req.body.issue.key;
 
+        // update Assigned Project Team
         let updateTeamPayload = {
             "fields": {
                 "customfield_19100": {
@@ -307,22 +177,21 @@ const controller = {
             if (error) {
                 console.log('Error: ' + error);
                 console.log(response.statusCode);
-                console.log(postOptions.body);
                 res.status(response.statusCode).send();
             }
-            else if (response.statusCode !== 200) {
-                console.log()
-                console.log(response.statusMessage);
+            // this should only catch 300 redirects
+            else if (!(response.statusCode >= 200 && response.statusCode < 300)) {
                 res.status(response.statusCode);
                 res.json(response.statusMessage);
             }
+            // if this ever ceases to become final function in order
+            // change this to return next()
             else {
                 res.status(response.statusCode);
                 res.json(response.statusMessage);
             }
-        })
+        });
     }
-
 }
 
 
